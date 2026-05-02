@@ -8,7 +8,7 @@ const ShopContextProvider = ({ children }) => {
   // ── Constants ───────────────────────────────────────────────
   const currency = "$";
   const deliveryCharge = 10;
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || "https://forever-ecommerce-2-9qcd.onrender.com";
+  const backendUrl = "https://forever-ecommerce-2-9qcd.onrender.com";
   const fallbackProducts = [
     {
       _id: "1",
