@@ -11,7 +11,7 @@ import Orders  from "./pages/Orders";
 import Login   from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 
-export const backendUrl = import.meta.env.VITE_BACKEND_URL;
+export const backendUrl = import.meta.env.VITE_BACKEND_URL || "https://forever-ecommerce-othp.onrender.com";
 export const currency   = "$";
 
 const App = () => {
