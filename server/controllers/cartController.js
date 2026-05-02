@@ -12,6 +12,9 @@ const addToCart = async (req, res) => {
     const { userId, itemId, size } = req.body;
 
     const userData = await userModel.findById(userId);
+    if (!userData) {
+      return res.json({ success: false, message: "User not found" });
+    }
     let cartData = await userData.cartData;
 
     // Build composite key: productId_size
@@ -41,6 +44,9 @@ const updateCart = async (req, res) => {
     const { userId, itemId, size, quantity } = req.body;
 
     const userData = await userModel.findById(userId);
+    if (!userData) {
+      return res.json({ success: false, message: "User not found" });
+    }
     let cartData = userData.cartData;
 
     cartData[itemId][size] = quantity;
@@ -60,6 +66,9 @@ const getUserCart = async (req, res) => {
     const { userId } = req.body;
 
     const userData = await userModel.findById(userId);
+    if (!userData) {
+      return res.json({ success: false, message: "User not found" });
+    }
     let cartData = userData.cartData;
 
     res.json({ success: true, cartData });
