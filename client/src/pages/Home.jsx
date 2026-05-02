@@ -4,12 +4,9 @@ import LatestCollection from "../components/LatestCollection";
 import BestSeller from "../components/BestSeller";
 import OurPolicy from "../components/OurPolicy";
 import NewsletterBox from "../components/NewsletterBox";
-import Marquee from "../components/Marquee";
-
 const Home = () => {
   return (
     <div>
-      <Marquee />
       <Hero />
       <LatestCollection />
       <BestSeller />
