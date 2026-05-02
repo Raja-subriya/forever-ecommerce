@@ -1,16 +1,37 @@
 import mongoose from "mongoose";
 
-// Connects to MongoDB Atlas using the URI from .env
+// Connects to MongoDB Atlas
 const connectDB = async () => {
+  // Set connection options
+  mongoose.set('strictQuery', false);
+
   mongoose.connection.on("connected", () => {
-    console.log("✅ MongoDB Connected Successfully");
+    console.log("✅ MongoDB Connected Successfully to:", mongoose.connection.name);
+  });
+
+  mongoose.connection.on("error", (err) => {
+    console.error("❌ MongoDB connection error:", err);
+  });
+
+  mongoose.connection.on("disconnected", () => {
+    console.log("⚠️ MongoDB disconnected");
   });
 
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
+      throw new Error("MONGODB_URI is missing in .env file");
+    }
+
+    // Connect with a timeout to prevent infinite buffering
+    await mongoose.connect(uri, {
+      dbName: "forever", // Explicitly set database name
+      serverSelectionTimeoutMS: 5000, 
+    });
+    
   } catch (error) {
-    console.error("❌ MongoDB Connection Error:", error.message);
-    console.error("Make sure your MONGODB_URI is a cloud URL (Atlas), not localhost!");
+    console.error("❌ Failed to connect to MongoDB:", error.message);
+    process.exit(1); // Exit if cannot connect
   }
 };
 
