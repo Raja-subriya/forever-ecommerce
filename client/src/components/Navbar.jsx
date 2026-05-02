@@ -58,8 +58,9 @@ const Navbar = () => {
       </ul>
 
       {/* Admin Panel Button */}
+      {/* Admin Panel Button */}
       <button
-        onClick={() => window.open(import.meta.env.VITE_ADMIN_URL || "https://forever-ecommerce-kappa.vercel.app", "_blank")}
+        onClick={() => window.open(import.meta.env.VITE_ADMIN_URL || "https://forever-admin-eight-bice.vercel.app", "_blank")}
         className="hidden sm:inline-block border border-gray-300 rounded-full px-4 py-1 text-sm hover:bg-gray-100 transition"
       >
         Admin Panel
