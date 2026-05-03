@@ -10,6 +10,7 @@ import List    from "./pages/List";
 import Orders  from "./pages/Orders";
 import Login   from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Marquee from "./components/Marquee";
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL || "https://forever-ecommerce-2-9qcd.onrender.com";
 export const currency   = "$";
@@ -31,6 +32,7 @@ const App = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      <Marquee />
       <ToastContainer />
       <Navbar setToken={setToken} />
       <div className="flex w-full">
