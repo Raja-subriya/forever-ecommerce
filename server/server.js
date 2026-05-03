@@ -34,7 +34,11 @@ connectCloudinary();
 app.use(express.json());
 app.use(cors());
 
-// Routes
+// Request logger
+app.use((req, res, next) => {
+  console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
+  next();
+});
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);

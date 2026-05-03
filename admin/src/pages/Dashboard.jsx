@@ -4,7 +4,9 @@ import {
   AreaChart, Area, BarChart, Bar, Legend 
 } from 'recharts';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { backendUrl, currency } from '../App';
+import { fallbackProducts, fallbackOrders } from '../assets/fallbackData';
 
 const Dashboard = ({ token }) => {
   const [stats, setStats] = useState({
@@ -14,40 +16,64 @@ const Dashboard = ({ token }) => {
     chartData: []
   });
 
+  const [loading, setLoading] = useState(true);
+  const [isSample, setIsSample] = useState(false);
+
   const fetchDashboardData = async () => {
     try {
-      // Fetch orders to calculate revenue and order count
-      const ordersRes = await axios.post(`${backendUrl}/api/order/list`, {}, { headers: { token } });
-      const productsRes = await axios.get(`${backendUrl}/api/product/list`);
+      setLoading(true);
+      
+      // Fetch orders and products in parallel for better performance
+      const [ordersRes, productsRes] = await Promise.all([
+        axios.post(`${backendUrl}/api/order/list`, {}, { headers: { token } }).catch(err => ({ data: { success: false, message: err.message } })),
+        axios.get(`${backendUrl}/api/product/list`).catch(err => ({ data: { success: false, message: err.message } }))
+      ]);
 
-      if (ordersRes.data.success && productsRes.data.success) {
-        const orders = ordersRes.data.orders;
-        const totalRevenue = orders.reduce((sum, order) => sum + order.amount, 0);
-        
-        // Mock data for the chart based on actual orders
-        // In a real app, you'd group orders by date on the backend
-        const last7Days = [...Array(7)].map((_, i) => {
-          const d = new Date();
-          d.setDate(d.getDate() - (6 - i));
-          const dateStr = d.toLocaleDateString('en-US', { weekday: 'short' });
-          return { name: dateStr, revenue: Math.floor(Math.random() * 500) + 100, orders: Math.floor(Math.random() * 10) + 1 };
-        });
+      const newState = { ...stats };
+      let orders = [];
+      let products = [];
 
-        setStats({
-          totalRevenue,
-          totalOrders: orders.length,
-          totalProducts: productsRes.data.products.length,
-          chartData: last7Days
-        });
+      if (ordersRes.data.success && ordersRes.data.orders?.length > 0) {
+        orders = ordersRes.data.orders;
+        setIsSample(false);
+      } else {
+        orders = fallbackOrders;
+        setIsSample(true);
       }
+
+      if (productsRes.data.success && productsRes.data.products?.length > 0) {
+        products = productsRes.data.products;
+      } else {
+        products = fallbackProducts;
+      }
+
+      newState.totalRevenue = orders.reduce((sum, order) => sum + (order.amount || 0), 0);
+      newState.totalOrders = orders.length;
+      newState.totalProducts = products.length;
+      
+      // Mock data for the chart based on actual orders
+      newState.chartData = [...Array(7)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        const dateStr = d.toLocaleDateString('en-US', { weekday: 'short' });
+        // Use real order data logic here if possible, otherwise keep nice mock trends
+        return { name: dateStr, revenue: Math.floor(Math.random() * 500) + 100, orders: Math.floor(Math.random() * 10) + 1 };
+      });
+
+      setStats(newState);
     } catch (error) {
       console.error("Error fetching dashboard stats", error);
+      toast.error("An error occurred while loading dashboard data");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (token) {
+      fetchDashboardData();
+    }
+  }, [token]);
 
   const StatCard = ({ title, value, icon, color }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
@@ -61,11 +87,26 @@ const Dashboard = ({ token }) => {
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-1">Dashboard</h2>
-        <p className="text-gray-500 text-sm">Welcome back! Here's what's happening with your store today.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-1">Dashboard</h2>
+          <p className="text-gray-500 text-sm">Welcome back! Here's what's happening with your store today.</p>
+        </div>
+        {isSample && (
+          <span className="bg-pink-100 text-pink-700 px-4 py-2 rounded-full text-xs font-bold animate-pulse">
+            SHOWING SAMPLE DATA
+          </span>
+        )}
       </div>
 
       {/* Stats Overview */}
@@ -159,6 +200,13 @@ const Dashboard = ({ token }) => {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Debug Info (Helpful for setup) */}
+      <div className="mt-12 p-4 bg-gray-100 rounded-lg border border-gray-200 opacity-50 hover:opacity-100 transition-opacity">
+        <p className="text-xs font-mono text-gray-500">
+          <b>Debug Info:</b> Backend URL: {backendUrl} | Token: {token ? "Valid" : "Missing"} | Stats Status: {stats.totalProducts > 0 || stats.totalOrders > 0 ? "Data Loaded" : "No Data / Error"}
+        </p>
       </div>
     </div>
   );

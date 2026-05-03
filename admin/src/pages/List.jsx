@@ -2,21 +2,37 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { backendUrl, currency } from "../App";
+import { fallbackProducts } from "../assets/fallbackData";
 
 const List = ({ token }) => {
   const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isSample, setIsSample] = useState(false);
 
   const fetchList = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(`${backendUrl}/api/product/list`);
       if (res.data.success) {
-        setList(res.data.products);
+        if (res.data.products && res.data.products.length > 0) {
+          setList(res.data.products);
+          setIsSample(false);
+        } else {
+          setList(fallbackProducts);
+          setIsSample(true);
+        }
       } else {
-        toast.error(res.data.message);
+        setList(fallbackProducts);
+        setIsSample(true);
+        toast.error(res.data.message || "Failed to fetch products, showing samples");
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.error(error);
+      setList(fallbackProducts);
+      setIsSample(true);
+      toast.error("Connecting to server... Showing sample products for now.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,9 +59,24 @@ const List = ({ token }) => {
     fetchList();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <p className="mb-2">All Products List</p>
+      <div className="flex justify-between items-center mb-4">
+        <p className="text-xl font-bold text-gray-700">All Products List</p>
+        {isSample && (
+          <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+            SHOWING SAMPLE DATA
+          </span>
+        )}
+      </div>
 
       <div className="flex flex-col gap-2">
         {/* ------- Table Title ------- */}

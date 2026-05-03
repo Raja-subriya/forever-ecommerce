@@ -23,11 +23,10 @@ const connectDB = async () => {
       throw new Error("MONGODB_URI is missing in .env file");
     }
 
-    // Connect with a timeout and explicit database name
+    // Connect with a timeout
     await mongoose.connect(uri, {
-      dbName: "forever",
       serverSelectionTimeoutMS: 10000, // 10 seconds
-      family: 4 // Force IPv4 (often helps with connection issues)
+      family: 4 // Force IPv4
     });
     
   } catch (error) {
