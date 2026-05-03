@@ -6,7 +6,7 @@ const connectDB = async () => {
   mongoose.set('strictQuery', false);
 
   mongoose.connection.on("connected", () => {
-    console.log("✅ MongoDB Connected Successfully to:", mongoose.connection.name);
+    console.log("✅ MongoDB Connected Successfully to host:", mongoose.connection.host);
   });
 
   mongoose.connection.on("error", (err) => {
@@ -27,10 +27,9 @@ const connectDB = async () => {
     const maskedUri = uri.replace(/\/\/(.*):(.*)@/, "//***:***@");
     console.log("Attempting to connect to MongoDB:", maskedUri);
 
-    // Connect with a slightly longer timeout
+    // Connect with a 30s timeout
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 30000, // 30 seconds (better for slow connections)
-      family: 4 
+      serverSelectionTimeoutMS: 30000, 
     });
     
   } catch (error) {
