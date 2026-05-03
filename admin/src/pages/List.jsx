@@ -11,26 +11,13 @@ const List = ({ token }) => {
 
   const fetchList = async () => {
     try {
-      setLoading(true);
-      const res = await axios.get(`${backendUrl}/api/product/list`, { timeout: 5000 });
-      if (res.data.success) {
-        if (res.data.products && res.data.products.length > 0) {
-          setList(res.data.products);
-          setIsSample(false);
-        } else {
-          setList(fallbackProducts);
-          setIsSample(true);
-        }
-      } else {
-        setList(fallbackProducts);
-        setIsSample(true);
+      const res = await axios.get(`${backendUrl}/api/product/list`, { timeout: 60000 });
+      if (res.data.success && res.data.products?.length > 0) {
+        setList(res.data.products);
+        setIsSample(false);
       }
     } catch (error) {
-      // Timeout or network error — show sample data immediately
-      setList(fallbackProducts);
-      setIsSample(true);
-    } finally {
-      setLoading(false);
+      // silent — already showing sample data
     }
   };
 
@@ -54,6 +41,10 @@ const List = ({ token }) => {
   };
 
   useEffect(() => {
+    // Show sample data immediately, fetch real data in background
+    setList(fallbackProducts);
+    setIsSample(true);
+    setLoading(false);
     fetchList();
   }, []);
 

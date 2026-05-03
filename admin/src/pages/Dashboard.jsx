@@ -23,10 +23,11 @@ const Dashboard = ({ token }) => {
     try {
       setLoading(true);
       
-      // Fetch orders and products in parallel with a 5s timeout each
+      // Fetch orders and products in parallel
+      // NOTE: Render free tier can take 30-60s to wake up — using 60s timeout
       const [ordersRes, productsRes] = await Promise.all([
-        axios.post(`${backendUrl}/api/order/list`, {}, { headers: { token }, timeout: 5000 }).catch(() => ({ data: { success: false } })),
-        axios.get(`${backendUrl}/api/product/list`, { timeout: 5000 }).catch(() => ({ data: { success: false } }))
+        axios.post(`${backendUrl}/api/order/list`, {}, { headers: { token }, timeout: 60000 }).catch(() => ({ data: { success: false } })),
+        axios.get(`${backendUrl}/api/product/list`, { timeout: 60000 }).catch(() => ({ data: { success: false } }))
       ]);
 
       const newState = { ...stats };
@@ -63,7 +64,6 @@ const Dashboard = ({ token }) => {
       setStats(newState);
     } catch (error) {
       console.error("Error fetching dashboard stats", error);
-      toast.error("An error occurred while loading dashboard data");
     } finally {
       setLoading(false);
     }
@@ -71,6 +71,22 @@ const Dashboard = ({ token }) => {
 
   useEffect(() => {
     if (token) {
+      // Show sample data immediately, then try to load real data
+      const orders = fallbackOrders;
+      const products = fallbackProducts;
+      setStats({
+        totalRevenue: orders.reduce((s, o) => s + o.amount, 0),
+        totalOrders: orders.length,
+        totalProducts: products.length,
+        chartData: [...Array(7)].map((_, i) => {
+          const d = new Date();
+          d.setDate(d.getDate() - (6 - i));
+          return { name: d.toLocaleDateString('en-US', { weekday: 'short' }), revenue: Math.floor(Math.random() * 500) + 100, orders: Math.floor(Math.random() * 10) + 1 };
+        })
+      });
+      setIsSample(true);
+      setLoading(false);
+      // Fetch real data in background (won't block UI)
       fetchDashboardData();
     }
   }, [token]);

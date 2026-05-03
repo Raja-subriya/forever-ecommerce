@@ -11,30 +11,17 @@ const Orders = ({ token }) => {
 
   const fetchAllOrders = async () => {
     try {
-      setLoading(true);
       const res = await axios.post(
         `${backendUrl}/api/order/list`,
         {},
-        { headers: { token }, timeout: 5000 }
+        { headers: { token }, timeout: 60000 }
       );
-      if (res.data.success) {
-        if (res.data.orders && res.data.orders.length > 0) {
-          setOrders(res.data.orders.reverse());
-          setIsSample(false);
-        } else {
-          setOrders(fallbackOrders);
-          setIsSample(true);
-        }
-      } else {
-        setOrders(fallbackOrders);
-        setIsSample(true);
+      if (res.data.success && res.data.orders?.length > 0) {
+        setOrders(res.data.orders.reverse());
+        setIsSample(false);
       }
     } catch (error) {
-      // Timeout or network error — show sample data immediately
-      setOrders(fallbackOrders);
-      setIsSample(true);
-    } finally {
-      setLoading(false);
+      // silent — already showing sample data
     }
   };
 
@@ -55,6 +42,10 @@ const Orders = ({ token }) => {
   };
 
   useEffect(() => {
+    // Show sample data immediately, fetch real data in background
+    setOrders(fallbackOrders);
+    setIsSample(true);
+    setLoading(false);
     fetchAllOrders();
   }, [token]);
 
