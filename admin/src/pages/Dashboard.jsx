@@ -218,12 +218,7 @@ const Dashboard = ({ token }) => {
         </div>
       </div>
 
-      {/* Debug Info (Helpful for setup) */}
-      <div className="mt-12 p-4 bg-gray-100 rounded-lg border border-gray-200 opacity-50 hover:opacity-100 transition-opacity">
-        <p className="text-xs font-mono text-gray-500">
-          <b>Debug Info:</b> Backend URL: {backendUrl} | Token: {token ? "Valid" : "Missing"} | Stats Status: {stats.totalProducts > 0 || stats.totalOrders > 0 ? "Data Loaded" : "No Data / Error"}
-        </p>
-      </div>
+
     </div>
   );
 };
