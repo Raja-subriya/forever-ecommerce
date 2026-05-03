@@ -23,10 +23,10 @@ const Dashboard = ({ token }) => {
     try {
       setLoading(true);
       
-      // Fetch orders and products in parallel for better performance
+      // Fetch orders and products in parallel with a 5s timeout each
       const [ordersRes, productsRes] = await Promise.all([
-        axios.post(`${backendUrl}/api/order/list`, {}, { headers: { token } }).catch(err => ({ data: { success: false, message: err.message } })),
-        axios.get(`${backendUrl}/api/product/list`).catch(err => ({ data: { success: false, message: err.message } }))
+        axios.post(`${backendUrl}/api/order/list`, {}, { headers: { token }, timeout: 5000 }).catch(() => ({ data: { success: false } })),
+        axios.get(`${backendUrl}/api/product/list`, { timeout: 5000 }).catch(() => ({ data: { success: false } }))
       ]);
 
       const newState = { ...stats };

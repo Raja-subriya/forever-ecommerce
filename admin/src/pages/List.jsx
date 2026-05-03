@@ -12,7 +12,7 @@ const List = ({ token }) => {
   const fetchList = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${backendUrl}/api/product/list`);
+      const res = await axios.get(`${backendUrl}/api/product/list`, { timeout: 5000 });
       if (res.data.success) {
         if (res.data.products && res.data.products.length > 0) {
           setList(res.data.products);
@@ -24,13 +24,11 @@ const List = ({ token }) => {
       } else {
         setList(fallbackProducts);
         setIsSample(true);
-        toast.error(res.data.message || "Failed to fetch products, showing samples");
       }
     } catch (error) {
-      console.error(error);
+      // Timeout or network error — show sample data immediately
       setList(fallbackProducts);
       setIsSample(true);
-      toast.error("Connecting to server... Showing sample products for now.");
     } finally {
       setLoading(false);
     }

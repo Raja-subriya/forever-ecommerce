@@ -15,7 +15,7 @@ const Orders = ({ token }) => {
       const res = await axios.post(
         `${backendUrl}/api/order/list`,
         {},
-        { headers: { token } }
+        { headers: { token }, timeout: 5000 }
       );
       if (res.data.success) {
         if (res.data.orders && res.data.orders.length > 0) {
@@ -28,13 +28,11 @@ const Orders = ({ token }) => {
       } else {
         setOrders(fallbackOrders);
         setIsSample(true);
-        toast.error(res.data.message || "Failed to fetch orders, showing samples");
       }
     } catch (error) {
-      console.error(error);
+      // Timeout or network error — show sample data immediately
       setOrders(fallbackOrders);
       setIsSample(true);
-      toast.error("Connecting to server... Showing sample orders for now.");
     } finally {
       setLoading(false);
     }
