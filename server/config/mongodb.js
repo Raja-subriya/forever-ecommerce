@@ -23,15 +23,20 @@ const connectDB = async () => {
       throw new Error("MONGODB_URI is missing in .env file");
     }
 
-    // Connect with a timeout
+    // Mask URI for logging (hide password)
+    const maskedUri = uri.replace(/\/\/(.*):(.*)@/, "//***:***@");
+    console.log("Attempting to connect to MongoDB:", maskedUri);
+
+    // Connect with a slightly longer timeout
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 10000, // 10 seconds
-      family: 4 // Force IPv4
+      serverSelectionTimeoutMS: 30000, // 30 seconds (better for slow connections)
+      family: 4 
     });
     
   } catch (error) {
     console.error("❌ Failed to connect to MongoDB:", error.message);
-    // Don't exit process, let server stay alive for debugging
+    // If connection fails, queries will timeout. 
+    // We should probably inform the app state if we were in a larger framework.
   }
 };
 
